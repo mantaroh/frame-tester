@@ -12,6 +12,7 @@ class App extends Component {
     this.createFrame = this.createFrame.bind(this);
     this.setCreateNum = this.setCreateNum.bind(this);
     this.keyHandle = this.keyHandle.bind(this);
+    this.buttonRef = React.createRef();
   }
 
   componentDidCatch(error, info) {
@@ -19,22 +20,32 @@ class App extends Component {
     console.log(info);
   }
 
+  componetDidMount() {
+    this.buttonRef.current.disabled = false;
+  }
+
   createFrame() {
+    if (this.buttonRef.current.disabled) {
+      // Press enter key on input area during create the frame.
+      return;
+    }
     this.setState({
       label: "Wait for finishing load the frame."
     });
 
     let count = 0;
-    let intervalId = setInterval(() => {
+    this.buttonRef.current.disabled = true;
+    let intervalId = setInterval((function() {
       let frame = document.createElement("iframe");
       document.body.appendChild(frame);
-      if (count++ > this.state.createNum) {
+      if (++count >= this.state.createNum) {
         clearInterval(intervalId);
         this.setState({
           label: "Go! Click the frames button!."
         });
+        this.buttonRef.current.disabled = false;
       }
-    }, 50);
+    }).bind(this), 50);
   }
 
   setCreateNum(event) {
@@ -88,6 +99,8 @@ class App extends Component {
         {
           key: "GoButton",
           onClick: this.createFrame,
+          ref: this.buttonRef,
+          disabled: false
         },
         "Go"
       )
